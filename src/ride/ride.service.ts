@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateRideDto } from './dto/create-ride.dto';
 import { UpdateRideDto } from './dto/update-ride.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { RideEntity } from '../DB/Entities/ride.entity';
 import { UserEntityRide } from '../DB/Entities/user.entity.ride';
 import { NotificationsEntity } from '../DB/Entities/notifications.entity';
@@ -16,6 +16,13 @@ export class RideService {
     private userRideEntity: Repository<UserEntityRide>,
     @InjectRepository(NotificationsEntity)
     private notificationRepository: Repository<NotificationsEntity>,
+    @InjectRepository(Payment)
+    private paymentRepository: Repository<Payment>,
+    @InjectRepository(UserLevelEntity)
+    private userLevelRepository: Repository<UserLevelEntity>,
+    private achievementCronService: AchievementCronService,
+    private levelService: LevelService,
+    private bicycleService: BicycleService,
   ) {}
   create(createRideDto: CreateRideDto, userId: string) {
     // @ts-ignore
@@ -50,9 +57,18 @@ export class RideService {
       .createQueryBuilder('ride')
       .where({ ride_id: id })
       .getManyAndCount();
+    const wasPaid = await this.paymentRepository.find({
+      where: { ride_id: id, user_id: userId },
+    });
+    console.log(wasPaid);
     const isApplied = await this.userRideEntity.findOne({
       where: { user_id: userId, ride_id: id },
     });
+    if (wasPaid.find((e) => e.status === 'succeeded')) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      result.wasPaid = true;
+    }
     if (isApplied) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error

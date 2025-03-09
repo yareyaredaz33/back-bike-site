@@ -54,10 +54,93 @@ export class RideController {
   @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string, @Req() request) {
     const result = await this.rideService.findOne(id, request.user.userInfo.id);
+
+    // Перевіряємо статус заявки користувача
+    const applicationStatus = await this.rideService.getApplicationStatus(
+      request.user.userInfo.id,
+      id,
+    );
+
     return {
       ...result,
       canBeDeleted: result.user_id === request.user.userInfo.id,
     };
+  }
+
+  // Модифікований метод приєднання до поїздки
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/apply')
+  async subscribeToUser(
+    @Param() params: { id: string },
+    @Body() applicationDto: CreateRideApplicationDto,
+    @Res() res: Response,
+    @Req() request,
+  ) {
+    try {
+      const result = await this.rideService.applyToRide(
+        request.user.userInfo,
+        params.id,
+        applicationDto,
+      );
+
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+
+  // Нові ендпоінти для роботи з заявками
+
+  // Отримання заявок для тренера
+  @Get('applications/trainer')
+  @UseGuards(JwtAuthGuard)
+  async getTrainerApplications(
+    @Req() request,
+    @Query('rideId') rideId?: string,
+  ) {
+    return this.rideService.getApplicationsForTrainer(
+      request.user.userInfo.id,
+      rideId,
+    );
+  }
+
+  // Отримання заявок користувача
+  @Get('applications/user')
+  @UseGuards(JwtAuthGuard)
+  async getUserApplications(@Req() request) {
+    return this.rideService.getUserApplications(request.user.userInfo.id);
+  }
+
+  // Схвалення або відхилення заявки тренером
+  @Patch('applications/:applicationId')
+  @UseGuards(JwtAuthGuard)
+  async handleApplication(
+    @Param('applicationId') applicationId: string,
+    @Body() updateDto: UpdateRideApplicationDto,
+    @Req() request,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.rideService.handleRideApplication(
+        request.user.userInfo.id,
+        applicationId,
+        updateDto,
+      );
+
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+
+  // Отримання заявок для конкретної поїздки (для тренера)
+  @Get(':id/applications')
+  @UseGuards(JwtAuthGuard)
+  async getRideApplications(@Param('id') rideId: string, @Req() request) {
+    return this.rideService.getApplicationsForTrainer(
+      request.user.userInfo.id,
+      rideId,
+    );
   }
 
   @Patch(':id')
@@ -70,21 +153,6 @@ export class RideController {
     return this.rideService.remove(id);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post(':id/apply')
-  async subscribeToUser(
-    @Param() params: { id: string },
-    @Res() res: Response,
-    @Req() request,
-  ) {
-    console.log(request.user.userInfo);
-    const result = await this.rideService.applyToRide(
-      request.user.userInfo,
-      params.id,
-    );
-    result ? res.sendStatus(201) : res.sendStatus(400);
-    return;
-  }
   @UseGuards(JwtAuthGuard)
   @Delete(':id/unapply')
   async unSubscribeToUser(
