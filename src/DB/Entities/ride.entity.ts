@@ -3,7 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  CreateDateColumn,
+  CreateDateColumn, OneToMany,
 } from 'typeorm';
 import { RoadEntity } from './road.entity';
 import { UserEntityRide } from './user.entity.ride';

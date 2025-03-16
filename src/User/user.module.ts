@@ -10,6 +10,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { SubscriptionsEntity } from '../DB/Entities/subscriptionsEntity';
 import { ChatEntity } from '../DB/Entities/chat.entity';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, SubscriptionsEntity, ChatEntity]),
@@ -34,6 +35,6 @@ import { ChatEntity } from '../DB/Entities/chat.entity';
   ],
   controllers: [UserController],
   providers: [UserService, UserModel, FileService],
-  exports: [UserService, UserModel],
+  exports: [UserService, UserModel,FileService],
 })
 export class UserModule {}

@@ -12,7 +12,11 @@ import { Payment } from '../DB/Entities/Payment';
   providers: [RideService],
   imports: [
     TypeOrmModule.forFeature([RideEntity, UserEntityRide, NotificationsEntity]),
+      RideEntity,
+      UserEntityRide,
+      NotificationsEntity,
       Payment,
+      RideApplicationEntity,
   ],
 })
 export class RideModule {}

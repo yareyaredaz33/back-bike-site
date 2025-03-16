@@ -9,12 +9,15 @@ import {
   UseGuards,
   Res,
   Req,
+  Query,
 } from '@nestjs/common';
 import { RideService } from './ride.service';
 import { CreateRideDto } from './dto/create-ride.dto';
 import { UpdateRideDto } from './dto/update-ride.dto';
 import { JwtAuthGuard } from '../Auth/Guards/jwt.auth.guards';
-import { Response } from 'express';
+import { Response } from 'express'
+import { CreateRideApplicationDto } from './dto/create-ride-application.dto';
+import { UpdateRideApplicationDto } from './dto/update-ride-application.dto';
 
 @Controller('ride')
 export class RideController {
@@ -23,7 +26,6 @@ export class RideController {
   @Post()
   @UseGuards(JwtAuthGuard)
   create(@Body() createRideDto: CreateRideDto, @Req() request) {
-    console.log(createRideDto);
     return this.rideService.create(createRideDto, request.user.userInfo.id);
   }
 
@@ -34,9 +36,23 @@ export class RideController {
   }
 
   @Get()
-  findAll() {
-    return this.rideService.findAll();
+  @UseGuards(JwtAuthGuard)
+  findAll(
+    @Query('q') search: string,
+    @Query('type') type: string,
+    @Req() request,
+  ) {
+    if (search === 'recommended') {
+      const userId = request.user?.userInfo?.id;
+      if (!userId) {
+        return this.rideService.findAll();
+      }
+      return this.rideService.getRecommendedRides(userId);
+    }
+
+    return this.rideService.findAll(null, search);
   }
+
   @Get('user_rides/:id')
   findAllForUser(@Param('id') userId: string) {
     return this.rideService.findAll(userId);
@@ -45,8 +61,6 @@ export class RideController {
   @Get('user_rides_current')
   @UseGuards(JwtAuthGuard)
   findAllForCurrentUser(@Param('id') userId: string, @Req() request) {
-    console.log(request.user);
-    console.log('hello');
     return this.rideService.findAll(request.user.userInfo.id);
   }
 
@@ -64,6 +78,7 @@ export class RideController {
     return {
       ...result,
       canBeDeleted: result.user_id === request.user.userInfo.id,
+      applicationStatus, // pending | approved | rejected | null
     };
   }
 
