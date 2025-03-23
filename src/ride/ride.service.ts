@@ -6,6 +6,10 @@ import { In, Like, Repository } from 'typeorm';
 import { RideEntity } from '../DB/Entities/ride.entity';
 import { UserEntityRide } from '../DB/Entities/user.entity.ride';
 import { NotificationsEntity } from '../DB/Entities/notifications.entity';
+import {
+  ApplicationStatus,
+  RideApplicationEntity,
+} from '../DB/Entities/ride-application.entity';
 
 @Injectable()
 export class RideService {
@@ -34,18 +38,26 @@ export class RideService {
       date: createRideDto.date,
       user_id: userId,
       road: createRideDto.roadId,
+      isPaid: createRideDto.isPaid,
+      distance: createRideDto.distance,
+      duration: createRideDto.duration,
     });
     const rideEntity = this.rideEntityRepository.save(ride);
     return rideEntity;
   }
 
-  async findAll(userId?) {
+  async findAll(userId?: string, search?: string) {
+    // Якщо вказано userId, повертаємо поїздки цього користувача
     if (userId) {
       const ids = await this.userRideEntity.find({
         where: { user_id: userId },
       });
       const newIds = ids.map((id) => id.ride_id);
-      console.log(newIds);
+
+      if (newIds.length === 0) {
+        return [];
+      }
+
       return this.rideEntityRepository.find({ where: { id: In(newIds) } });
     }
     return this.rideEntityRepository.find();

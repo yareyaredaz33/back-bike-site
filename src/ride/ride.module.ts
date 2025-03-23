@@ -6,17 +6,27 @@ import { RideEntity } from '../DB/Entities/ride.entity';
 import { UserEntityRide } from '../DB/Entities/user.entity.ride';
 import { NotificationsEntity } from '../DB/Entities/notifications.entity';
 import { Payment } from '../DB/Entities/Payment';
+import { RideApplicationEntity } from '../DB/Entities/ride-application.entity';
 
 @Module({
   controllers: [RideController],
   providers: [RideService],
   imports: [
-    TypeOrmModule.forFeature([RideEntity, UserEntityRide, NotificationsEntity]),
+    TypeOrmModule.forFeature([
+      BicycleEntity,
       RideEntity,
       UserEntityRide,
       NotificationsEntity,
       Payment,
+      AchievementEntity,
+      UserAchievementEntity,
+      LevelModule,
+      UserLevelEntity,
+      MonthlyGoalEntity,
+      MonthlyStatsEntity,
       RideApplicationEntity,
+      UserEntity,
+    ]),
   ],
 })
 export class RideModule {}
