@@ -6,10 +6,23 @@ import { In, Like, Repository } from 'typeorm';
 import { RideEntity } from '../DB/Entities/ride.entity';
 import { UserEntityRide } from '../DB/Entities/user.entity.ride';
 import { NotificationsEntity } from '../DB/Entities/notifications.entity';
+import { Payment } from '../DB/Entities/Payment';
+import { UserLevelEntity } from '../DB/Entities/level.entity';
+import { AchievementCronService } from '../achievment/achievement-cron.service';
+import { LevelService } from '../level/level.service';
+import { CreateRideApplicationDto } from './dto/create-ride-application.dto';
+import { UserEntity } from '../DB/Entities/user.entity';
 import {
   ApplicationStatus,
   RideApplicationEntity,
 } from '../DB/Entities/ride-application.entity';
+import { UpdateRideApplicationDto } from './dto/update-ride-application.dto';
+import { BicycleEntity } from '../DB/Entities/bicycle.entity';
+import { BicycleService } from '../bicycle/bicycle.service';
+
+interface RecommendedRideWithScore extends RideEntity {
+  confidenceScore: number;
+}
 
 @Injectable()
 export class RideService {
@@ -39,6 +52,7 @@ export class RideService {
       user_id: userId,
       road: createRideDto.roadId,
       isPaid: createRideDto.isPaid,
+      price: createRideDto.price || 0,
       distance: createRideDto.distance,
       duration: createRideDto.duration,
     });

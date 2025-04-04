@@ -6,7 +6,16 @@ import { RideEntity } from '../DB/Entities/ride.entity';
 import { UserEntityRide } from '../DB/Entities/user.entity.ride';
 import { NotificationsEntity } from '../DB/Entities/notifications.entity';
 import { Payment } from '../DB/Entities/Payment';
+import { AchievementCronService } from '../achievment/achievement-cron.service';
+import { AchievementService } from '../achievment/achievment.service';
+import { AchievementEntity, UserAchievementEntity } from '../DB/Entities/achivement.entity';
+import { LevelModule } from '../level/level';
+import { LevelService } from '../level/level.service';
+import { MonthlyGoalEntity, MonthlyStatsEntity, UserLevelEntity } from '../DB/Entities/level.entity';
 import { RideApplicationEntity } from '../DB/Entities/ride-application.entity';
+import { UserEntity } from '../DB/Entities/user.entity';
+import { BicycleEntity } from '../DB/Entities/bicycle.entity';
+import { BicycleService } from '../bicycle/bicycle.service';
 
 @Module({
   controllers: [RideController],
