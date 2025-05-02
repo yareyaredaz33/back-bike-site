@@ -503,11 +503,24 @@ export class RideService {
     return subscriptions;
   }
 
-  findAllForUser(userId: string) {
-    return this.rideEntityRepository
-      .createQueryBuilder('ride')
-      .where({ user_id: userId })
-      .orderBy('ride.createdat', 'DESC')
-      .getMany();
+  async findAllForUser(userId: string) {
+    const ride_ids = await this.userRideEntity.find({
+      where: { user_id: userId },
+    });
+
+    const ids = ride_ids.map((ride) => ride.ride_id);
+    const rides = await this.rideEntityRepository.find({
+      where: { id: In(ids) },
+      order: {
+        date: 'ASC',
+      },
+    });
+    const userRides = await this.rideEntityRepository.find({
+      where: { user_id: userId },
+      order: {
+        date: 'ASC',
+      },
+    });
+    return [...rides, ...userRides];
   }
 }

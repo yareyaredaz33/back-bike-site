@@ -20,6 +20,8 @@ import { BicycleService } from '../bicycle/bicycle.service';
 @Module({
   controllers: [RideController],
   providers: [RideService],
+    AchievementCronService,
+    AchievementService,
   imports: [
     TypeOrmModule.forFeature([
       BicycleEntity,
