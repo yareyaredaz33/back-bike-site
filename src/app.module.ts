@@ -25,6 +25,9 @@ import { ArticlesModule } from './articles/articles.module';
 import { ArticleEntity } from './DB/Entities/article.entity';
 import { CommentsModule } from './comments/comments.module';
 import { CommentEntity } from './DB/Entities/comment.entity';
+import { ReportEntity } from './DB/Entities/report.entity';
+import { ReportsModule } from './reports/reports.module';
+import { GuardsModule } from './Auth/Guards/guards.module';
 
 @Module({
   imports: [
@@ -59,6 +62,8 @@ import { CommentEntity } from './DB/Entities/comment.entity';
           ArticleEntity,
           CommentEntity,
           ChatEntity,
+          ReportEntity,
+          UserBanEntity,
         ],
       }),
       inject: [ConfigService],
@@ -69,6 +74,8 @@ import { CommentEntity } from './DB/Entities/comment.entity';
     NotificationsModule,
     ArticlesModule,
     CommentsModule,
+    ReportsModule,
+    GuardsModule,
   ],
   controllers: [AppController, AuthController],
   providers: [AppService],
