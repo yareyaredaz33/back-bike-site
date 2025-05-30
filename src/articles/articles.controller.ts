@@ -17,6 +17,8 @@ import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { JwtAuthGuard } from '../Auth/Guards/jwt.auth.guards';
+import { BannedUserGuard } from '../Auth/Guards/banned-user.guard';
+import { AdminGuard } from '../Auth/Guards/admin.guards';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { FileService } from '../User/file.service';
@@ -27,7 +29,8 @@ export class ArticlesController {
     private readonly articlesService: ArticlesService,
     private readonly fileService: FileService,
   ) {}
-  @UseGuards(JwtAuthGuard)
+
+  @UseGuards(JwtAuthGuard, BannedUserGuard)
   @Post()
   create(@Body() createArticleDto: CreateArticleDto, @Req() req) {
     return this.articlesService.create(createArticleDto, req.user.userInfo.id);
@@ -45,7 +48,7 @@ export class ArticlesController {
 
   @Get('/user-posts')
   @UseGuards(JwtAuthGuard)
-  findAllForCurrentUser(@Param('id') id: string, @Req() req) {
+  findAllForCurrentUser(@Req() req) {
     return this.articlesService.findAllForUser(req.user.userInfo.id);
   }
 
@@ -60,16 +63,22 @@ export class ArticlesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
-    return this.articlesService.update(+id, updateArticleDto);
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Body() updateArticleDto: UpdateArticleDto,
+    @Req() req
+  ) {
+    return this.articlesService.update(+id, updateArticleDto, req.user.userInfo.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.articlesService.remove(id);
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string, @Req() req) {
+    return this.articlesService.remove(id, req.user.userInfo.id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, BannedUserGuard)
   @Post('upload-photo')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
@@ -78,7 +87,6 @@ export class ArticlesController {
     @Req() request,
   ) {
     try {
-      console.log(file);
       const result = await this.fileService.uploadFile(file);
       return res.json({
         message: 'Файл успішно завантажено',
@@ -87,5 +95,22 @@ export class ArticlesController {
     } catch (error) {
       console.log(error);
     }
+  }
+}
+
+@Controller('admin/articles')
+export class AdminArticlesController {
+  constructor(private readonly articlesService: ArticlesService) {}
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  adminRemove(@Param('id') id: string) {
+    return this.articlesService.adminRemove(id);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  findAllForAdmin(@Query('_sort') sort, @Query('_order') order, @Query('q') q) {
+    return this.articlesService.findAll(sort, order, q);
   }
 }
