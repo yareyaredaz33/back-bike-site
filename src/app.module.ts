@@ -51,6 +51,7 @@ import { BicycleModule } from './bicycle/bicycle.module';
     RoadModule,
     ChatModule,
     NotificationsModule,
+    PaymentsModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -63,6 +64,7 @@ import { BicycleModule } from './bicycle/bicycle.module';
         synchronize: true,
         ssl: true,
         entities: [
+          BicycleEntity,
           UserEntity,
           UserRoleEntity,
           UserSettingsEntity,
@@ -89,6 +91,7 @@ import { BicycleModule } from './bicycle/bicycle.module';
       }),
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
     RoadModule,
     ChatModule,
     RideModule,
